@@ -36,6 +36,8 @@ services:
       resources:
         limits:
           memory: 512M
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       FASTPAY_HOSTNAME: http://localhost:9995
       DATABASE_JDBC_URL: jdbc:postgresql://algashop-postgres:5432/fastpay
@@ -44,3 +46,13 @@ services:
       SPRING_PROFILES_ACTIVE: docker
 volumes:
   algashop-postgres:
+# Sub-rede fixa para a rede padrao do Compose.
+# Necessario no Linux/Ubuntu para que a regra de firewall (ufw) que libera
+# o trafego dos containers ate o webhook do billing (host:8082) continue
+# valida mesmo apos recriar os containers.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+          gateway: 172.30.0.1
